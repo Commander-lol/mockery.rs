@@ -1,0 +1,19 @@
+{
+	"models": {
+		"account": {
+			"id": "UUID4",
+			"name": "Company",
+			"cover_photo": {
+				"LoremPicsum": {
+					"width": 200,
+					"height": 200
+				}
+			}
+		},
+		"user": {
+			"id": "UUID4",
+			"name": "FullName",
+			"location": "LatLong"
+		}
+	}
+}

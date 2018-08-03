@@ -1,5 +1,5 @@
 [package]
-name = "super-agent-mockery"
+name = "mockery"
 version = "0.1.0"
 authors = ["Louis Capitanchik <contact@louiscap.co>"]
 
@@ -16,3 +16,5 @@ serde_derive = "1.0.70"
 chrono = { version = "0.4.4", features = ["serde"] }
 regex = "1.0.2"
 lazy_static = "1.0.2"
+rayon = "1.0.2"
+rayon-hash = "0.3.0"

@@ -1,32 +1,102 @@
 use uuid;
-use chrono::prelude::*;
 use std::{self, fmt};
-use serde::{self, Deserialize, Deserializer};
-use serde::de::{self, Visitor};
-use serde_json;
-use regex::Regex;
+use serde::de::{self, Visitor, Deserialize, Deserializer};
+use serde::ser::{self, Serialize, Serializer};
+use database::ToSql;
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
+/// An Enum that represents all of the possible random data generation types.
+/// Where the type is a struct, it should be represented as a nested map type, where the outer
+/// map contains only a property correlating to the struct name, and it's value should be a nested
+/// map with the struct values.
+///
+/// # Examples
+///
+/// Representing a person with a randomly generated full name, as well as an age between 18 and 25
+/// (e.g. seeding a database for under-25 travelcards) would be written like this in JSON:
+///
+/// ```json
+/// {
+///     "person": {
+///         "name": "FullName",
+///         "age": {
+///             "NumberBetween": {
+///                 "min": 18,
+///                 "max": 25
+///             }
+///         }
+///     }
+/// }
+/// ```
+///
+/// Similarly, if you were defining your models in YAML, and wanted to define a company contact card,
+/// you would write something like:
+///
+/// ```yaml
+/// company:
+///     name: Company
+///     contact_email: Email
+///     contact_number: PhoneNumber
+///     address: StreetAddress
+///     postcode: Postcode
+///     cover_image:
+///         LoremPicsum:
+///             width: 500
+///             height: 200
+/// ```
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum RandomData {
+    /// Generates a latin first name
     FirstName,
+    /// Generates a latin surname
     LastName,
+    /// Generates a combination of a `FirstName` and `LastName`, combined with a space between them
     FullName,
+    /// Generates a safe email address
     Email,
-    Number { digits: usize },
-    NumberBetween { min: usize, max: usize },
+    /// Generates an integer with the given number of digits.
+    ///
+    /// # Examples
+    ///
+    /// `{ "digits": 3 }` will generate a number between 100 and 999, inclusive
+    Number {
+        /// The number of digits the generated number should have, to get a number with an appropriate
+        /// order of magnitude
+        digits: usize,
+    },
+    /// Generate a random number between the minimum and maximum boundaries
+    NumberBetween {
+        /// The minimum boundary for the generated number. This boundary is inclusive
+        min: usize,
+        /// The maximum boundary for the generated number. This boundary is exclusive
+        max: usize
+    },
+    /// Generates the name of a local company - usually an amalgamation of name-parts
     Company,
+    /// Generates the name of a city
     City,
+    /// Generates a sensible street address (including house number and street name components)
     StreetAddress,
+    /// Generates a valid latitude component
     Latitude,
+    /// Generates a valid longitude component
     Longitude,
+    /// Generates an object that contains both latitude and longitude
     LatLong,
+    /// Geenrates a valid postcode
     Postcode,
+    /// Generates a valid V4 UUID, generally useful for object IDs
     UUID4,
+    /// Generates a valid phone number
     PhoneNumber,
+    /// Generates a URL to a random picture with the given dimensions and optional greyscale mode.
+    /// Where one of the size values is absent, the image will be a square as dictated by the
+    /// other value that is present. Where both are absent, the image will be a 200x200 pixel square.
     LoremPicsum { width: Option<usize>, height: Option<usize>, grayscale: Option<bool> },
-    DateBetween { format: Option<String> }
 }
+
 impl RandomData {
+    /// Consumes the `RandomData` instance and turns it into a random piece of data, corresponding to
+    /// its type
     pub fn into_data(self) -> String {
         generate_fake_data(self)
     }
@@ -37,82 +107,18 @@ impl std::string::ToString for RandomData {
     }
 }
 
-lazy_static! {
-    static ref PARENT_TYPE_CAPTURE: Regex = Regex::new(r#"ParentType\((\w+)\)"#).unwrap();
-    static ref REFERENCE_CAPTURE: Regex = Regex::new(r#"Reference\((\w+)\)"#).unwrap();
-}
-
-#[derive(Clone, Debug, Serialize)]
-pub enum Constraint {
-    Parent,
-    ParentType(String),
-    Reference(String),
-}
-struct ConstraintVisitor;
-#[derive(Clone, Debug)]
-struct CustomError;
-impl fmt::Display for CustomError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        f.write_str("Oh no")
-    }
-}
-impl de::Error for CustomError {
-    fn custom<T>(msg: T) -> Self
-        where
-            T: fmt::Display {
-        CustomError
-    }
-}
-impl std::error::Error for CustomError {}
-
-impl <'de>Visitor <'de>for ConstraintVisitor {
-    type Value = Constraint;
-
-    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        formatter.write_str("Parent, ParentType(model_name) or Reference(field_ref)")
-    }
-
-    fn visit_str<E>(self, v: &str) -> Result<<Self as Visitor>::Value, E> where
-        E: de::Error, {
-//        let v =
-        if v == "Parent" {
-            Ok(Constraint::Parent)
-        } else if let Some(parent_type) = PARENT_TYPE_CAPTURE.captures(v) {
-            parent_type.get(1);
-            Err(CustomError {} as de::Error)
-        } else {
-            Err(CustomError {} as de::Error)
-        }
-    }
-}
-
-impl <'de> Deserialize<'de> for Constraint {
-    fn deserialize<D>(deserializer: D) -> Result<Self, <D as Deserializer<'de>>::Error> where
-        D: Deserializer<'de> {
-        unimplemented!()
-    }
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-pub enum DataType {
-    Data(RandomData),
-    Constraint(Constraint, String),
-    Model(String),
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-pub struct DataField {
-    data: DataType,
-    reference: Option<String>,
-}
-impl std::str::FromStr for DataField {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, <Self as std::str::FromStr>::Err> {
-        serde_json::from_str(s).unwrap()
-    }
-}
-
+/// Use a `RandomData` definition to generate a random string of data
+///
+/// # Examples
+///
+/// ```rust
+/// use mockery::datatypes::{RandomData, generate_fake_data};
+/// println!(
+///     "Hello {}, your new email address is {}",
+///     generate_fake_data(RandomData::FullName),
+///     generate_fake_data(RandomData::Email)
+/// )
+/// ```
 pub fn generate_fake_data(spec: RandomData) -> String {
     match spec {
         RandomData::FirstName => format!("{}", fake!(Name.first_name)),
@@ -136,10 +142,6 @@ pub fn generate_fake_data(spec: RandomData) -> String {
             width.unwrap_or(200),
             height.unwrap_or(200)
         ),
-//        DataType::DateBetween{ format } => {
-//            let now = Utc::now();
-//            format!("{}", fake!(Chrono.between(format, &now.to_rfc3339(), &now.to_rfc3339())))
-//        },
         _ => String::new(),
     }
 }
