@@ -7,7 +7,6 @@ extern crate postgres;
 extern crate r2d2;
 extern crate r2d2_postgres;
 extern crate regex;
-#[macro_use] extern crate lazy_static;
 
 extern crate serde;
 #[macro_use] extern crate serde_derive;

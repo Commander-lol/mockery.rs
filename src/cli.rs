@@ -1,5 +1,5 @@
 use clap::{Arg, App};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::default::Default;
 
 use generation::OutputType;
@@ -14,9 +14,6 @@ pub struct CliArgs {
 
 impl <'s>From<&'s str> for OutputType {
     fn from(s: &'s str) -> Self {
-        let csv = String::from("csv");
-        let json = String::from("json");
-
         match s {
             "csv" => OutputType::CSV,
             "json" => OutputType::JSON,

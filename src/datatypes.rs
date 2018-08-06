@@ -1,8 +1,5 @@
 use uuid;
-use std::{self, fmt};
-use serde::de::{self, Visitor, Deserialize, Deserializer};
-use serde::ser::{self, Serialize, Serializer};
-use database::ToSql;
+use std;
 
 /// An Enum that represents all of the possible random data generation types.
 /// Where the type is a struct, it should be represented as a nested map type, where the outer

@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use datatypes::RandomData;
 use std::string::ToString;
-use std::convert::AsRef;
 
 type Map<T> = HashMap<String, T>;
 type GeneratedProperties = Map<String>;
@@ -40,21 +39,20 @@ impl Model {
 
 pub mod io {
     use std::path::Path;
-    use std::io::prelude::*;
     use std::io::{Result, Error};
     use std::fs::read_to_string;
     use model::ModelMap;
-    use serde_json::{from_str, to_string};
+    use serde_json::from_str;
 
     pub fn read_from_spec<P>(path: P) -> Result<ModelMap> where P: AsRef<Path> {
         let file = read_to_string(path.as_ref())?;
         from_str(&file).map_err(|e| Error::from(e))
     }
-    pub fn write_to_spec<P>(model: ModelMap, path: P) -> Result<()> where P: AsRef<Path> {
-        let output = to_string(&model);
-        println!("{:?}", output);
-        Ok(())
-    }
+//    pub fn _write_to_spec<P>(model: ModelMap, path: P) -> Result<()> where P: AsRef<Path> {
+//        let output = to_string(&model);
+//        println!("{:?}", output);
+//        Ok(())
+//    }
 }
 
 impl ModelMap {

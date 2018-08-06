@@ -8,14 +8,14 @@ pub struct GenerationSpecification {
 impl GenerationSpecification {
     pub fn generate_models(&self, models: &ModelMap) -> Vec<String> {
         use serde_json::to_string;
-        let size = self.models.iter().fold(0, |t, (k, v)| t + v);
+        let size = self.models.iter().fold(0, |t, (_, v)| t + v);
         let mut output = Vec::with_capacity(size);
         self.models.iter().for_each(|(k, v)| {
             let def = match models.get_model(k.to_string()) {
                 Some(m) => m,
                 None => return,
             };
-            for i in 0..*v {
+            for _ in 0..*v {
                 output.push(to_string(&def.generate_data()).unwrap())
             }
         });
@@ -40,8 +40,8 @@ impl OutputType {
     }
 }
 
+/// Contains all of the IO operations for output generation
 pub mod io {
-    use std;
     use std::io::prelude::*;
     use std::io::{Result, Error, ErrorKind, SeekFrom};
     use std::fs::{File, read_to_string, create_dir_all};
@@ -66,7 +66,7 @@ pub mod io {
                 .to_str()
                 .map_or(Err(Error::from(ErrorKind::NotFound)), |s| Ok(String::from(s)))?;
 
-            let mut par_map: HashMap<&String, &Model> = HashMap::from_iter(models.get_models_ref().iter());
+            let par_map: HashMap<&String, &Model> = HashMap::from_iter(models.get_models_ref().iter());
             let err_list: Vec<Result<()>> = par_map.par_iter()
                 .filter(|(key, _)| self.models.contains_key(**key))
                 .map(|(type_name, model): (&&String, &&Model)| {
