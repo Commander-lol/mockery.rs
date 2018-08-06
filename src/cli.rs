@@ -57,10 +57,12 @@ pub fn get_args_from_stdin() -> CliArgs {
             .required(false))
         .arg(Arg::with_name("INPUT")
             .help("Sets the input file to use")
+            .long_help("Sets the input file to use. The input file determines the cardinality of models to create, as well as any additional constraints that might be applied")
             .required(true)
             .index(1))
         .arg(Arg::with_name("OUTPUT")
-            .help("Sets the output path. Setting to '-' will stream to stdout")
+            .help("Sets the output path. Must be a folder")
+            .long_help("Sets the output path. Must be a folder; if it does not exist, it will be created. Files corresponding to the input model names will be created inside this folder")
             .required(true)
             .index(2))
         .get_matches();

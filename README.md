@@ -24,11 +24,12 @@ OPTIONS:
 
 ARGS:
     <INPUT>     
-            Sets the input file to use
-
+            Sets the input file to use. The input file determines the cardinality of models to create, as well as any
+            additional constraints that might be applied
     <OUTPUT>    
-            Sets the output path. Setting to '-' will stream to stdout
-
+            Sets the output path. Must be a folder; if it does not exist, it will be created. Files corresponding to the
+            input model names will be created inside this folder
 
 To view help, use -h. For long form help, use --help
+
 ```
