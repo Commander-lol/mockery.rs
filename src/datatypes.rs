@@ -77,7 +77,7 @@ pub enum RandomData {
     Latitude,
     /// Generates a valid longitude component
     Longitude,
-    /// Generates an object that contains both latitude and longitude
+    /// Generates a valid GeoJSON Point object
     LatLong,
     /// Geenrates a valid postcode
     Postcode,
@@ -132,7 +132,7 @@ pub fn generate_fake_data(spec: RandomData) -> String {
         RandomData::StreetAddress => format!("{}", fake!(Address.street_address)),
         RandomData::Latitude => format!("{}", fake!(Address.latitude)),
         RandomData::Longitude => format!("{}", fake!(Address.longitude)),
-        RandomData::LatLong => format!(r#"{{ "lat": "{}", "long": "{}" }}"#, fake!(Address.latitude), fake!(Address.longitude)),
+        RandomData::LatLong => format!(r#"{{ "type": "Point", "coordinates": [{}, {}] }}"#, fake!(Address.longitude), fake!(Address.latitude)),
         RandomData::Postcode => format!("{}", fake!(Address.postcode)),
         RandomData::UUID4 => format!("{}", uuid::Uuid::new_v4()),
         RandomData::PhoneNumber => format!("{}", fake!(PhoneNumber.phone_number)),

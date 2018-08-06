@@ -1,5 +1,6 @@
 {
 	"models": {
-		"account": 200000
+		"account": 200000,
+		"user": 200000
 	}
 }
