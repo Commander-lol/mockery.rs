@@ -12,7 +12,7 @@ pub struct CliArgs {
     pub output_type: OutputType,
 }
 
-impl <'s>From<&'s str> for OutputType {
+impl<'s> From<&'s str> for OutputType {
     fn from(s: &'s str) -> Self {
         match s {
             "csv" => OutputType::CSV,

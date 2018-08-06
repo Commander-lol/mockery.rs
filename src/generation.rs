@@ -1,5 +1,6 @@
 use std::collections::HashMap as StdHashMap;
 use model::ModelMap;
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct GenerationSpecification {
     models: StdHashMap<String, usize>,
@@ -89,7 +90,7 @@ pub mod io {
                             }
 
                             file.write("\n]".as_ref())?;
-                        },
+                        }
                         OutputType::CSV => {
                             let ordering = models.get_serialize_ref().get(*type_name);
                             let mut writer = Csv::from_writer(file);
@@ -106,7 +107,7 @@ pub mod io {
                                 }
                                 writer.write_record(&row)?;
                             }
-                        },
+                        }
                     }
 
                     Ok(())

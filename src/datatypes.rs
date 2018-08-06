@@ -65,7 +65,7 @@ pub enum RandomData {
         /// The minimum boundary for the generated number. This boundary is inclusive
         min: usize,
         /// The maximum boundary for the generated number. This boundary is exclusive
-        max: usize
+        max: usize,
     },
     /// Generates the name of a local company - usually an amalgamation of name-parts
     Company,
@@ -100,6 +100,7 @@ impl RandomData {
         generate_fake_data(self)
     }
 }
+
 impl std::string::ToString for RandomData {
     fn to_string(&self) -> String {
         self.clone().into_data()
