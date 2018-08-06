@@ -53,7 +53,7 @@ pub fn get_args_from_stdin() -> CliArgs {
             .value_name("OUTPUT_TYPE")
             .possible_value("csv")
             .possible_value("json")
-            .long_help("Sets the output type. This value defaults to CSV for higher compatibility and throughput. Possible values: json, csv")
+            .long_help("Sets the output type. This value defaults to CSV for higher compatibility and throughput")
             .required(false))
         .arg(Arg::with_name("INPUT")
             .help("Sets the input file to use")
