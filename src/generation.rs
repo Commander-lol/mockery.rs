@@ -24,7 +24,24 @@ impl GenerationSpecification {
     }
 }
 
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+pub enum OutputType {
+    JSON,
+    CSV,
+}
+
+impl OutputType {
+    pub fn as_extension(&self) -> &'static str {
+        use self::OutputType::*;
+        match self {
+            JSON => "json",
+            CSV => "csv",
+        }
+    }
+}
+
 pub mod io {
+    use std;
     use std::io::prelude::*;
     use std::io::{Result, Error, ErrorKind, SeekFrom};
     use std::fs::{File, read_to_string, create_dir_all};
@@ -33,15 +50,16 @@ pub mod io {
     use std::iter::FromIterator;
 
     use serde_json::{from_str, to_string};
+    use csv::Writer as Csv;
 
     use model::{ModelMap, Model};
-    use generation::GenerationSpecification;
+    use generation::{GenerationSpecification, OutputType};
     use rayon_hash::HashMap;
     use rayon::iter::IntoParallelRefIterator;
     use rayon::iter::ParallelIterator;
 
     impl GenerationSpecification {
-        pub fn generate_output_files<P: AsRef<Path>>(&self, path: P, models: &ModelMap) -> Result<()> {
+        pub fn generate_output_files<P: AsRef<Path>>(&self, path: P, models: &ModelMap, out_type: OutputType) -> Result<()> {
             create_dir_all(&path)?;
 
             let path_stub: String = path.as_ref()
@@ -51,23 +69,45 @@ pub mod io {
             let mut par_map: HashMap<&String, &Model> = HashMap::from_iter(models.get_models_ref().iter());
             let err_list: Vec<Result<()>> = par_map.par_iter()
                 .filter(|(key, _)| self.models.contains_key(**key))
-                .map(|(type_name, model)| {
+                .map(|(type_name, model): (&&String, &&Model)| {
                     let mut path = PathBuf::from(&path_stub);
                     path.push(type_name);
 
-                    let mut file = File::create(path.with_extension("json"))?;
-                    file.write("[\n".as_ref())?;
+                    let mut file = File::create(path.with_extension(out_type.as_extension()))?;
 
-                    let quantity = self.models.get(*type_name).unwrap();
-                    for _ in 0..*quantity {
-                        file.write(to_string(&model.generate_data()).unwrap().as_ref())?;
-                        file.write(",\n".as_ref())?;
-                    }
-                    if quantity > &0usize {
-                        file.seek(SeekFrom::Current(-(",\n".as_bytes().len() as i64)))?;
-                    }
+                    match out_type {
+                        OutputType::JSON => {
+                            file.write("[\n".as_ref())?;
 
-                    file.write("\n]".as_ref())?;
+                            let quantity = self.models.get(*type_name).unwrap();
+                            for _ in 0..*quantity {
+                                file.write(to_string(&model.generate_data()).unwrap().as_ref())?;
+                                file.write(",\n".as_ref())?;
+                            }
+                            if quantity > &0usize {
+                                file.seek(SeekFrom::Current(-(",\n".as_bytes().len() as i64)))?;
+                            }
+
+                            file.write("\n]".as_ref())?;
+                        },
+                        OutputType::CSV => {
+                            let ordering = models.get_serialize_ref().get(*type_name);
+                            let mut writer = Csv::from_writer(file);
+                            let quantity = self.models.get(*type_name).unwrap();
+                            for _ in 0..*quantity {
+                                let data_set = model.generate_data();
+                                let mut row: Vec<String> = Vec::new();
+                                if let Some(order) = ordering {
+                                    for key in order.iter() {
+                                        row.push(data_set.get(key).unwrap_or(&String::from("null")).to_string());
+                                    }
+                                } else {
+                                    data_set.values().for_each(|v| row.push(v.clone()));
+                                }
+                                writer.write_record(&row)?;
+                            }
+                        },
+                    }
 
                     Ok(())
                 })

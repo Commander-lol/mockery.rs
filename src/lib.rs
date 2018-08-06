@@ -15,6 +15,7 @@ extern crate serde_json;
 
 extern crate rayon;
 extern crate rayon_hash;
+extern crate csv;
 
 /// All routines related to the insertion of fake data into a Postgresql database are contained
 /// within the **database** module

@@ -2,11 +2,27 @@ use clap::{Arg, App};
 use std::path::{Path, PathBuf};
 use std::default::Default;
 
+use generation::OutputType;
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct CliArgs {
     pub models_file_path: PathBuf,
     pub gen_spec_path: PathBuf,
     pub output_path: PathBuf,
+    pub output_type: OutputType,
+}
+
+impl <'s>From<&'s str> for OutputType {
+    fn from(s: &'s str) -> Self {
+        let csv = String::from("csv");
+        let json = String::from("json");
+
+        match s {
+            "csv" => OutputType::CSV,
+            "json" => OutputType::JSON,
+            _ => OutputType::CSV,
+        }
+    }
 }
 
 impl Default for CliArgs {
@@ -15,6 +31,7 @@ impl Default for CliArgs {
             models_file_path: PathBuf::default(),
             gen_spec_path: PathBuf::default(),
             output_path: PathBuf::default(),
+            output_type: OutputType::CSV,
         }
     }
 }
@@ -31,6 +48,15 @@ pub fn get_args_from_stdin() -> CliArgs {
             .help("Sets the spec file to use")
             .value_name("SPEC_PATH")
             .long_help("Sets the spec file to use. By default, mockery will look for a 'spec.json' file in CWD, and will error if it can not be found")
+            .required(false))
+        .arg(Arg::with_name("type")
+            .short("t")
+            .long("type")
+            .help("Sets the output type")
+            .value_name("OUTPUT_TYPE")
+            .possible_value("csv")
+            .possible_value("json")
+            .long_help("Sets the output type. This value defaults to CSV for higher compatibility and throughput. Possible values: json, csv")
             .required(false))
         .arg(Arg::with_name("INPUT")
             .help("Sets the input file to use")
@@ -52,5 +78,8 @@ pub fn get_args_from_stdin() -> CliArgs {
         output_path: matches.value_of("OUTPUT")
             .map(|s| PathBuf::from(s))
             .unwrap(),
+        output_type: matches.value_of("type")
+            .map(|s| OutputType::from(s))
+            .unwrap_or(OutputType::CSV),
     }
 }

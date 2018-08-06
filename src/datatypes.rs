@@ -92,6 +92,8 @@ pub enum RandomData {
     /// Where one of the size values is absent, the image will be a square as dictated by the
     /// other value that is present. Where both are absent, the image will be a 200x200 pixel square.
     LoremPicsum { width: Option<usize>, height: Option<usize>, grayscale: Option<bool> },
+    NullValue,
+    String { content: String },
 }
 
 impl RandomData {
@@ -142,6 +144,7 @@ pub fn generate_fake_data(spec: RandomData) -> String {
             width.unwrap_or(200),
             height.unwrap_or(200)
         ),
-        _ => String::new(),
+        RandomData::NullValue => format!("null"),
+        RandomData::String { content } => content.clone(),
     }
 }

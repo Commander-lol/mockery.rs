@@ -8,10 +8,11 @@ type GeneratedProperties = Map<String>;
 type GeneratedModels = Map<GeneratedProperties>;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Model(HashMap<String, RandomData>);
+pub struct Model(pub HashMap<String, RandomData>);
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ModelMap {
+    serialize: HashMap<String, Vec<String>>,
     models: HashMap<String, Model>,
 }
 
@@ -59,6 +60,7 @@ pub mod io {
 impl ModelMap {
     pub fn new() -> Self {
         ModelMap {
+            serialize: HashMap::new(),
             models: HashMap::new(),
         }
     }
@@ -80,6 +82,9 @@ impl ModelMap {
     }
     pub fn get_models_ref(&self) -> &HashMap<String, Model> {
         &self.models
+    }
+    pub fn get_serialize_ref(&self) -> &HashMap<String, Vec<String>> {
+        &self.serialize
     }
 }
 
