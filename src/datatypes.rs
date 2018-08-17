@@ -77,10 +77,16 @@ pub enum RandomData {
     Latitude,
     /// Generates a valid longitude component
     Longitude,
-    /// Generates a valid GeoJSON Point object
+    /// Generates a coordinate pair, formatted as a JSON array of (Latitude, Longitude)
     LatLong,
+    /// Generates a coordinate pair, formatted as a JSON array of (Longitude, Latitude)
+    LongLat,
+    /// Generates a GeoJson point object using the WKT formatting for postgis recognition and insertion
+    GeoPoint,
     /// Geenrates a valid postcode
     Postcode,
+    /// Generates an address with `StreetAddress`, `City` and `PostCode` components, separated by commas
+    FullAddress,
     /// Generates a valid V4 UUID, generally useful for object IDs
     UUID4,
     /// Generates a valid phone number
@@ -91,6 +97,10 @@ pub enum RandomData {
     LoremPicsum { width: Option<usize>, height: Option<usize>, grayscale: Option<bool> },
     NullValue,
     String { content: String },
+    Reference {
+        model: String,
+        field: String,
+    },
 }
 
 impl RandomData {
@@ -132,8 +142,11 @@ pub fn generate_fake_data(spec: RandomData) -> String {
         RandomData::StreetAddress => format!("{}", fake!(Address.street_address)),
         RandomData::Latitude => format!("{}", fake!(Address.latitude)),
         RandomData::Longitude => format!("{}", fake!(Address.longitude)),
-        RandomData::LatLong => format!(r#"{{ "type": "Point", "coordinates": [{}, {}] }}"#, fake!(Address.longitude), fake!(Address.latitude)),
+        RandomData::LatLong => format!(r#"[{}, {}]"#, fake!(Address.latitude), fake!(Address.longitude)),
+        RandomData::LongLat => format!(r#"[{}, {}]"#, fake!(Address.longitude), fake!(Address.latitude)),
+        RandomData::GeoPoint => format!(r#"POINT({} {})"#, fake!(Address.longitude), fake!(Address.latitude)),
         RandomData::Postcode => format!("{}", fake!(Address.postcode)),
+        RandomData::FullAddress => format!("{}, {}, {}", fake!(Address.street_address), fake!(Address.city), fake!(Address.postcode)),
         RandomData::UUID4 => format!("{}", uuid::Uuid::new_v4()),
         RandomData::PhoneNumber => format!("{}", fake!(PhoneNumber.phone_number)),
         RandomData::LoremPicsum { width, height, grayscale } => format!(
@@ -144,5 +157,6 @@ pub fn generate_fake_data(spec: RandomData) -> String {
         ),
         RandomData::NullValue => format!("null"),
         RandomData::String { content } => content.clone(),
+        RandomData::Reference { .. } => format!("null"),
     }
 }

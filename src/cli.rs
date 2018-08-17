@@ -6,7 +6,7 @@ use generation::OutputType;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct CliArgs {
-    pub models_file_path: PathBuf,
+    pub model_name: String,
     pub gen_spec_path: PathBuf,
     pub output_path: PathBuf,
     pub output_type: OutputType,
@@ -25,7 +25,7 @@ impl<'s> From<&'s str> for OutputType {
 impl Default for CliArgs {
     fn default() -> Self {
         CliArgs {
-            models_file_path: PathBuf::default(),
+            model_name: String::default(),
             gen_spec_path: PathBuf::default(),
             output_path: PathBuf::default(),
             output_type: OutputType::CSV,
@@ -55,9 +55,9 @@ pub fn get_args_from_stdin() -> CliArgs {
             .possible_value("json")
             .long_help("Sets the output type. This value defaults to CSV for higher compatibility and throughput")
             .required(false))
-        .arg(Arg::with_name("INPUT")
-            .help("Sets the input file to use")
-            .long_help("Sets the input file to use. The input file determines the cardinality of models to create, as well as any additional constraints that might be applied")
+        .arg(Arg::with_name("MODEL")
+            .help("Sets the model to generate")
+            .long_help("Sets the model to generate. The model determines what files will be generated based on it's definition in the spec")
             .required(true)
             .index(1))
         .arg(Arg::with_name("OUTPUT")
@@ -68,12 +68,12 @@ pub fn get_args_from_stdin() -> CliArgs {
         .get_matches();
 
     CliArgs {
-        models_file_path: matches.value_of("spec")
+        model_name: matches.value_of("MODEL")
+            .map(|s| String::from(s))
+            .unwrap(),
+        gen_spec_path: matches.value_of("spec")
             .map(|s| PathBuf::from(s))
             .unwrap_or_else(|| PathBuf::from("spec.json")),
-        gen_spec_path: matches.value_of("INPUT")
-            .map(|s| PathBuf::from(s))
-            .unwrap(),
         output_path: matches.value_of("OUTPUT")
             .map(|s| PathBuf::from(s))
             .unwrap(),

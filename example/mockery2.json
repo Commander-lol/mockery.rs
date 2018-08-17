@@ -1,0 +1,28 @@
+{
+	"property": {
+		"address": {
+			"type": "RandomData",
+			"value": "FullAddress"
+		},
+		"templates": {
+			"type": "List",
+			"value": {
+				"type": "Model",
+				"value": "template"
+			}
+		}
+	},
+	"template": {
+		"name": {
+			"type": "RandomData",
+			"value": "LastName"
+		},
+		"apartments": {
+			"type": "List",
+			"value": {
+				"type": "Model",
+				"value": "apartment"
+			}
+		}
+	}
+}

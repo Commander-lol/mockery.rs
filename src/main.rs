@@ -1,7 +1,7 @@
 extern crate clap;
 extern crate mockery;
 
-use mockery::{model, generation, cli};
+use mockery::{model, generation, cli, generator};
 
 fn main() {
     let args = cli::get_args_from_stdin();
@@ -9,8 +9,23 @@ fn main() {
 }
 
 fn process_args(args: cli::CliArgs) {
-    let model_map = model::io::read_from_spec(&args.models_file_path).unwrap();
-    let generation_spec = generation::io::generation_from_file(&args.gen_spec_path).unwrap();
 
-    generation_spec.generate_output_files(&args.output_path, &model_map, args.output_type).unwrap();
+    use mockery::specification::{Specification, self};
+    extern crate serde_json;
+
+    let model_name = &args.model_name;
+    let spec = specification::io::read_spec(&args.gen_spec_path).unwrap();
+
+    if spec.has_model(&model_name) {
+        let data = generator::from_spec(model_name.clone(), spec.clone());
+
+        match data {
+            Ok(res) => {
+                generator::write_output(&args.output_path, res, spec, args.output_type);
+            },
+            Err(e) => println!("Error: {}", e),
+        }
+    } else {
+        println!("No such model {} in {:?}", &model_name, &args.gen_spec_path.to_str());
+    }
 }

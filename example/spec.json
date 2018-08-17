@@ -12,33 +12,123 @@
 			"id",
 			"name",
 			"location"
+		],
+		"property": [
+			"id",
+			"provider_id",
+			"address",
+			"location",
+			"meta",
+			"created_at",
+			"updated_at",
+			"deleted_at"
 		]
 	},
 	"models": {
-		"account": {
-			"id": "UUID4",
-			"name": "Company",
-			"meta": {
-				"String": {
-					"content": "{}"
-				}
+		"simple_test": {
+			"id": {
+				"type": "RandomData",
+				"value": "UUID4"
 			},
-			"created_at": {
-				"String": {
-					"content": "2018-06-01 12:23:04.430000 +00:00"
-				}
+			"address": {
+				"type": "RandomData",
+				"value": "FullAddress"
 			},
-			"updated_at": {
-				"String": {
-					"content": "2018-06-01 12:23:04.430000 +00:00"
-				}
+			"owner": {
+				"type": "RandomData",
+				"value": "FullName"
 			},
-			"deleted_at": "NullValue"
+			"email": {
+				"type": "RandomData",
+				"value": "Email"
+			}
 		},
-		"user": {
-			"id": "UUID4",
-			"name": "FullName",
-			"location": "LatLong"
+		"list_test": {
+
+			"id": {
+				"type": "RandomData",
+				"value": "UUID4"
+			},
+			"address": {
+				"type": "RandomData",
+				"value": "FullAddress"
+			},
+			"owner": {
+				"type": "RandomData",
+				"value": "FullName"
+			},
+			"email": {
+				"type": "List",
+				"value": {
+					"type": "RandomData",
+					"value": "Email"
+				}
+			}
+		},
+		"property": {
+			"id": {
+				"type": "RandomData",
+				"value": "UUID4"
+			},
+			"address": {
+				"type": "RandomData",
+				"value": "FullAddress"
+			},
+			"location": {
+				"type": "RandomData",
+				"value": "GeoPoint"
+			},
+			"templates": {
+				"type": "List",
+				"value": {
+					"type": "Model",
+					"value": "template"
+				}
+			}
+		},
+		"template": {
+			"id": {
+				"type": "RandomData",
+				"value": "UUID4"
+			},
+			"name": {
+				"type": "RandomData",
+				"value": "LastName"
+			},
+			"property_id": {
+				"type": "Reference",
+				"value": {
+					"path": "^",
+					"property": "id"
+				}
+			},
+			"apartments": {
+				"type": "List",
+				"value": {
+					"type": "Model",
+					"value": "apartment"
+				}
+			}
+		},
+		"apartment": {
+			"id": {
+				"type": "RandomData",
+				"value": "UUID4"
+			},
+			"template_id": {
+				"type": "Reference",
+				"value": {
+					"path": "^",
+					"property": "id"
+				}
+			},
+			"property_id": {
+				"type": "Reference",
+				"value": {
+					"path": "^~^",
+					"property": "id"
+				}
+			}
 		}
 	}
 }

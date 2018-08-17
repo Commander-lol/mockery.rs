@@ -35,6 +35,18 @@ impl Model {
 
         generated
     }
+    /// Returns a list of types in this model that reference other models. The [RandomData] in the tuple will always
+    /// be a [RandomData::Reference] type
+    pub fn get_reference_types(&self) -> Vec<(String, RandomData)> {
+        self.0.iter()
+            .filter_map(|(key, value)| {
+                match value {
+                    RandomData::Reference { .. } => { Some((key.to_string(), value.clone())) },
+                    _ => { None },
+                }
+            })
+            .collect()
+    }
 }
 
 pub mod io {

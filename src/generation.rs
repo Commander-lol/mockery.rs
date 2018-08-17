@@ -1,5 +1,6 @@
 use std::collections::HashMap as StdHashMap;
 use model::ModelMap;
+use std::path::{Path, PathBuf};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct GenerationSpecification {
@@ -43,10 +44,11 @@ impl OutputType {
 
 /// Contains all of the IO operations for output generation
 pub mod io {
+    use super::*;
+
     use std::io::prelude::*;
     use std::io::{Result, Error, ErrorKind, SeekFrom};
     use std::fs::{File, read_to_string, create_dir_all};
-    use std::path::{Path, PathBuf};
     use std::convert::AsRef;
     use std::iter::FromIterator;
 
@@ -54,10 +56,15 @@ pub mod io {
     use csv::Writer as Csv;
 
     use model::{ModelMap, Model};
+    use datatypes::RandomData;
     use generation::{GenerationSpecification, OutputType};
     use rayon_hash::HashMap;
     use rayon::iter::IntoParallelRefIterator;
     use rayon::iter::ParallelIterator;
+
+    use std::sync::{Arc, Mutex};
+
+    type SyncedVec<T> = Arc<Mutex<Vec<T>>>;
 
     impl GenerationSpecification {
         pub fn generate_output_files<P: AsRef<Path>>(&self, path: P, models: &ModelMap, out_type: OutputType) -> Result<()> {
@@ -67,14 +74,14 @@ pub mod io {
                 .to_str()
                 .map_or(Err(Error::from(ErrorKind::NotFound)), |s| Ok(String::from(s)))?;
 
+            let mut ref_types: SyncedVec<(String, (String, RandomData))> = Arc::new(Mutex::new(Vec::new()));
+
             let par_map: HashMap<&String, &Model> = HashMap::from_iter(models.get_models_ref().iter());
             let err_list: Vec<Result<()>> = par_map.par_iter()
                 .filter(|(key, _)| self.models.contains_key(**key))
                 .map(|(type_name, model): (&&String, &&Model)| {
-                    let mut path = PathBuf::from(&path_stub);
-                    path.push(type_name);
-
-                    let mut file = File::create(path.with_extension(out_type.as_extension()))?;
+                    let path = create_path(path_stub.to_string(), type_name.to_string(), out_type);
+                    let mut file = File::create(path)?;
 
                     match out_type {
                         OutputType::JSON => {
@@ -110,9 +117,23 @@ pub mod io {
                         }
                     }
 
+                    let model_refs = model.get_reference_types();
+                    if model_refs.len() > 0 {
+                        let mut ref_types_vec = ref_types.lock().unwrap();
+                        for mr in model_refs {
+                            ref_types_vec.push((type_name.to_string(), mr));
+                        }
+                    }
+
                     Ok(())
                 })
                 .collect();
+
+            let required_refs = ref_types.lock().unwrap();
+
+            for (model_name, (field_name, reference)) in required_refs.iter() {
+                println!("{}, {}, {:?}", model_name, field_name, reference);
+            }
 
             for i in err_list {
                 i?;
@@ -143,4 +164,10 @@ pub mod io {
         file.write("]".as_ref())?;
         Ok(())
     }
+}
+
+fn create_path(prefix: String, file_name: String, output: OutputType) -> PathBuf {
+    let mut path = PathBuf::from(prefix);
+    path.push(file_name);
+    path.with_extension(output.as_extension())
 }
