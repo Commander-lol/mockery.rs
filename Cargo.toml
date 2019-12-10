@@ -6,6 +6,9 @@ description = "Generate mock data based on a specification file for a variety of
 license = "GPL-3.0+"
 edition = "2018"
 
+homepage = "https://github.com/Commander-lol/mockery.rs"
+repository = "https://github.com/Commander-lol/mockery.rs"
+
 [dependencies]
 uuid = { version = "0.8.1", features = ["v4"] }
 clap = "2.33.0"
