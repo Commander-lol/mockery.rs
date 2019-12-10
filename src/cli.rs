@@ -42,7 +42,7 @@ pub fn get_args_from_stdin() -> CliArgs {
 	let matches = App::new("mockery.rs")
         .version(env!("CARGO_PKG_VERSION"))
         .author("Louis Capitanchik <contact@louiscap.co>")
-        .about("Generate spec based model data that can be used for mocking APIs, inserted into a database or mailed to a friend.")
+        .about("Generate spec based model data.")
         .after_help("To view help, use -h. For long form help, use --help")
         .arg(Arg::with_name("spec")
             .short("s")
