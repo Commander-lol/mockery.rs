@@ -1,7 +1,7 @@
-pub mod datatypes;
-pub mod model;
-pub mod generation;
 pub mod cli;
+pub mod datatypes;
+pub mod generation;
+pub mod model;
 
-pub mod specification;
 pub mod generator;
+pub mod specification;

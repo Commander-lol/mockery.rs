@@ -1,45 +1,45 @@
 use crate::generation::OutputType;
 
-use clap::{Arg, App};
-use std::path::PathBuf;
-use std::default::Default;
+use clap::{App, Arg};
 use serde_derive::{Deserialize, Serialize};
+use std::default::Default;
+use std::path::PathBuf;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct CliArgs {
-    pub model_name: String,
-    pub gen_spec_path: PathBuf,
-    pub output_path: PathBuf,
-    pub output_type: OutputType,
-    pub model_amount: usize,
-    pub pretty_print: bool,
+	pub model_name: String,
+	pub gen_spec_path: PathBuf,
+	pub output_path: PathBuf,
+	pub output_type: OutputType,
+	pub model_amount: usize,
+	pub pretty_print: bool,
 }
 
 impl<'s> From<&'s str> for OutputType {
-    fn from(s: &'s str) -> Self {
-        match s {
-            "csv" => OutputType::CSV,
-            "json" => OutputType::JSON,
-            _ => OutputType::CSV,
-        }
-    }
+	fn from(s: &'s str) -> Self {
+		match s {
+			"csv" => OutputType::CSV,
+			"json" => OutputType::JSON,
+			_ => OutputType::CSV,
+		}
+	}
 }
 
 impl Default for CliArgs {
-    fn default() -> Self {
-        CliArgs {
-            model_name: String::default(),
-            gen_spec_path: PathBuf::default(),
-            output_path: PathBuf::default(),
-            output_type: OutputType::CSV,
-            model_amount: 1,
-            pretty_print: true,
-        }
-    }
+	fn default() -> Self {
+		CliArgs {
+			model_name: String::default(),
+			gen_spec_path: PathBuf::default(),
+			output_path: PathBuf::default(),
+			output_type: OutputType::CSV,
+			model_amount: 1,
+			pretty_print: true,
+		}
+	}
 }
 
 pub fn get_args_from_stdin() -> CliArgs {
-    let matches = App::new("mockery.rs")
+	let matches = App::new("mockery.rs")
         .version(env!("CARGO_PKG_VERSION"))
         .author("Louis Capitanchik <contact@louiscap.co>")
         .about("Generate spec based model data that can be used for mocking APIs, inserted into a database or mailed to a friend.")
@@ -84,22 +84,24 @@ pub fn get_args_from_stdin() -> CliArgs {
             .index(2))
         .get_matches();
 
-    CliArgs {
-        model_name: matches.value_of("MODEL")
-            .map(|s| String::from(s))
-            .unwrap(),
-        gen_spec_path: matches.value_of("spec")
-            .map(|s| PathBuf::from(s))
-            .unwrap_or_else(|| PathBuf::from("spec.json")),
-        output_path: matches.value_of("OUTPUT")
-            .map(|s| PathBuf::from(s))
-            .unwrap(),
-        output_type: matches.value_of("type")
-            .map(|s| OutputType::from(s))
-            .unwrap_or(OutputType::CSV),
-        model_amount: matches.value_of("amount")
-            .map(|s| s.parse::<usize>().unwrap())
-            .unwrap_or(1),
-        pretty_print: matches.is_present("pretty"),
-    }
+	CliArgs {
+		model_name: matches.value_of("MODEL").map(|s| String::from(s)).unwrap(),
+		gen_spec_path: matches
+			.value_of("spec")
+			.map(|s| PathBuf::from(s))
+			.unwrap_or_else(|| PathBuf::from("spec.json")),
+		output_path: matches
+			.value_of("OUTPUT")
+			.map(|s| PathBuf::from(s))
+			.unwrap(),
+		output_type: matches
+			.value_of("type")
+			.map(|s| OutputType::from(s))
+			.unwrap_or(OutputType::CSV),
+		model_amount: matches
+			.value_of("amount")
+			.map(|s| s.parse::<usize>().unwrap())
+			.unwrap_or(1),
+		pretty_print: matches.is_present("pretty"),
+	}
 }
