@@ -4,6 +4,10 @@ use serde_derive::{Deserialize, Serialize};
 use std::collections::HashMap as StdHashMap;
 use std::path::{Path, PathBuf};
 
+#[deprecated(
+	since = "0.2.0",
+	note = "Model generation has been moved to the `generator` module"
+)]
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct GenerationSpecification {
 	models: StdHashMap<String, usize>,
@@ -45,6 +49,10 @@ impl OutputType {
 }
 
 /// Contains all of the IO operations for output generation
+#[deprecated(
+	since = "0.2.0",
+	note = "Model generation has been moved to the `generator` module"
+)]
 pub mod io {
 	use super::*;
 
@@ -162,6 +170,10 @@ pub mod io {
 		}
 	}
 
+	#[deprecated(
+		since = "0.2.0",
+		note = "Model generation has been moved to the `generator` module"
+	)]
 	pub fn generation_from_file<P>(path: P) -> Result<GenerationSpecification>
 	where
 		P: AsRef<Path>,
@@ -170,6 +182,10 @@ pub mod io {
 		from_str(&file).map_err(|e| Error::from(e))
 	}
 
+	#[deprecated(
+		since = "0.2.0",
+		note = "Model generation has been moved to the `generator` module"
+	)]
 	pub fn write_models_to_file<P>(path: P, models: Vec<String>) -> Result<()>
 	where
 		P: AsRef<Path>,
