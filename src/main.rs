@@ -1,4 +1,3 @@
-use clap;
 use failure::{Error, Fail};
 use mockery::{cli, generation, generator, model};
 

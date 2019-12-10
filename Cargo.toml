@@ -2,6 +2,8 @@
 name = "mockery"
 version = "0.2.0"
 authors = ["Louis Capitanchik <contact@louiscap.co>"]
+description = "Generate mock data based on a specification file for a variety of purposes"
+license = "GPL-3.0+"
 edition = "2018"
 
 [dependencies]
