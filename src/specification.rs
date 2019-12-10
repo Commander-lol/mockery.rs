@@ -2,6 +2,8 @@ use crate::datatypes::RandomData;
 use std::string::ToString;
 use std::iter::Iterator;
 
+use serde_derive::{Deserialize, Serialize};
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Reference {
     path: String,
@@ -53,10 +55,10 @@ impl Specification {
 
 
 pub mod io {
-    use std;
+    use super::Specification;
+
     use std::io::Result;
     use std::fs::read_to_string;
-    use super::Specification;
     use std::path::{Path, PathBuf};
     use std::convert::AsRef;
     use serde_json::from_str;

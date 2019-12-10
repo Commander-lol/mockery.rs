@@ -2,6 +2,7 @@ use crate::model::ModelMap;
 
 use std::collections::HashMap as StdHashMap;
 use std::path::{Path, PathBuf};
+use serde_derive::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct GenerationSpecification {
@@ -61,6 +62,8 @@ pub mod io {
     use csv::Writer as Csv;
 
     use rayon_hash::HashMap;
+    use rayon::iter::IntoParallelRefIterator;
+    use rayon::iter::ParallelIterator;
 
     use std::sync::{Arc, Mutex};
 

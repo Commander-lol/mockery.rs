@@ -1,8 +1,8 @@
 use crate::generation::OutputType;
 use crate::datatypes::RandomData;
+use crate::specification::{Specification, Model, DataType as DT};
 
 use std::collections::HashMap;
-use specification::{Specification, Model, DataType as DT};
 use std::borrow::Borrow;
 use std::str::FromStr;
 use std::rc::Rc;

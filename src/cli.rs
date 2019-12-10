@@ -3,7 +3,7 @@ use crate::generation::OutputType;
 use clap::{Arg, App};
 use std::path::PathBuf;
 use std::default::Default;
-
+use serde_derive::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct CliArgs {

@@ -2,6 +2,7 @@ use crate::datatypes::RandomData;
 
 use std::collections::HashMap;
 use std::string::ToString;
+use serde_derive::{Deserialize, Serialize};
 
 type Map<T> = HashMap<String, T>;
 type GeneratedProperties = Map<String>;
@@ -51,10 +52,11 @@ impl Model {
 }
 
 pub mod io {
+    use crate::model::ModelMap;
+
     use std::path::Path;
     use std::io::{Result, Error};
     use std::fs::read_to_string;
-    use model::ModelMap;
     use serde_json::from_str;
 
     pub fn read_from_spec<P>(path: P) -> Result<ModelMap> where P: AsRef<Path> {
@@ -101,8 +103,8 @@ impl ModelMap {
 
 #[test]
 fn generate_random_data() {
-    use model::Model;
-    use datatypes::RandomData;
+    use crate::model::Model;
+    use crate::datatypes::RandomData;
 
     let mut model = Model::new();
 
