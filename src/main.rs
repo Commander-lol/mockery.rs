@@ -26,8 +26,10 @@ fn process_args(args: cli::CliArgs) -> Result<(), Error> {
     let spec = specification::io::read_spec(&args.gen_spec_path)?;
 
     if spec.has_model(&model_name) {
-        let data = generator::from_spec(model_name.clone(), spec.clone()).map_err(|e| StringErrorCompat::S(e))?;
-        generator::write_output(&args.output_path, data, spec, args.output_type);
+        let data = generator::from_spec(model_name.clone(), spec.clone(), args.model_amount)
+            .map_err(|e| StringErrorCompat::S(e))?;
+
+        generator::write_output(&args.output_path, data, spec, args.output_type, args.pretty_print);
     } else {
         println!("No such model {} in {:?}", &model_name, &args.gen_spec_path.to_str());
     }

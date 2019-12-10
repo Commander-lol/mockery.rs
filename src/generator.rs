@@ -15,6 +15,7 @@ use std::iter::FromIterator;
 
 use serde_json::{from_str, to_string};
 use csv::Writer as Csv;
+use std::io::Write;
 
 // ---------------------------------
 
@@ -131,7 +132,7 @@ impl GenContext {
     }
 }
 
-pub fn from_spec(model_name: String, spec: Specification) -> Result<ModelDataMap, String> {
+pub fn from_spec(model_name: String, spec: Specification, quantity: usize) -> Result<ModelDataMap, String> {
     let initial_model = spec.get_definition(&model_name);
     let deps = get_model_children(initial_model);
 
@@ -143,7 +144,9 @@ pub fn from_spec(model_name: String, spec: Specification) -> Result<ModelDataMap
         models: HashMap::new(),
     };
 
-    generate_model_data(model_name.clone(), initial_model, &mut initial_context, &spec);
+    for _ in 0..quantity {
+        generate_model_data(model_name.clone(), initial_model, &mut initial_context, &spec);
+    }
 
     Ok(initial_context.models)
 }
@@ -210,7 +213,7 @@ fn generate_model_data(model_type: String, model: &Model, ctx: &mut GenContext, 
 }
 
 
-pub fn write_output(folder: &PathBuf, data: ModelDataMap, spec: Specification, out_type: OutputType) {
+pub fn write_output(folder: &PathBuf, data: ModelDataMap, spec: Specification, out_type: OutputType, pretty: bool) {
     create_dir_all(&folder);
     match out_type {
         OutputType::CSV => {
@@ -235,6 +238,24 @@ pub fn write_output(folder: &PathBuf, data: ModelDataMap, spec: Specification, o
                 }
             })
         },
-        OutputType::JSON => unimplemented!("JSON has not been implemented just yet"),
+        OutputType::JSON =>{
+            data.iter().for_each(|(type_name, model_list)| {
+                let mut path = PathBuf::from(&folder);
+                path.push(&type_name);
+                path = path.with_extension(out_type.as_extension());
+                let mut file = File::create(path).expect("Creating file");
+
+                let contents = if pretty {
+                    serde_json::to_vec_pretty(model_list)
+                        .expect("Serialising formatted models")
+                } else {
+                    serde_json::to_vec(model_list)
+                        .expect("Serialising models")
+                };
+
+                file.write_all(contents.as_slice()).expect("Write model data to file");
+                file.flush().expect("Flush file contents");
+            });
+        }
     }
 }

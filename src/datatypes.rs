@@ -6,19 +6,40 @@ use rand::Rng;
 use std::ops::Add;
 
 /// An Enum that represents all of the possible random data generation types.
-/// Where the type is a struct, it should be represented as a nested map type, where the outer
-/// map contains only a property correlating to the struct name, and it's value should be a nested
-/// map with the struct values.
+/// Where the type is a struct it should be written in a specification as a nested map type,
+/// where the outer map contains a single property correlating to the struct variant
+/// with value should be a map containing the struct values.
 ///
 /// # Examples
 ///
-/// Representing a person with a randomly generated full name, as well as an age between 18 and 25
-/// (e.g. seeding a database for under-25 travelcards) would be written like this in JSON:
+/// ## Basic Model (JSON)
+///
+/// To model a company identification card that contains basic employee information using simple
+/// types:
 ///
 /// ```json
 /// {
-///     "person": {
+///     "information_card": {
 ///         "name": "FullName",
+///         "contact_email": "Email",
+///         "contact_number": "PhoneNumber",
+///         "address": "FullAddress"
+///     }
+/// }
+/// ```
+///
+/// ## Model With Struct Types (JSON)
+///
+/// To use complex data types that take arguments, you need to write the property values as
+/// nested map types. This example models an Under-25 Travelcard for a train company, where
+/// the age of the person needs to be between 18 and 25. The `NumberBetween` type takes two
+/// arguments:
+///
+/// ```json
+/// {
+///     "travelcard": {
+///         "name": "FullName",
+///         "address": "FullAddress",
 ///         "age": {
 ///             "NumberBetween": {
 ///                 "min": 18,
@@ -27,22 +48,6 @@ use std::ops::Add;
 ///         }
 ///     }
 /// }
-/// ```
-///
-/// Similarly, if you were defining your models in YAML, and wanted to define a company contact card,
-/// you would write something like:
-///
-/// ```yaml
-/// company:
-///     name: Company
-///     contact_email: Email
-///     contact_number: PhoneNumber
-///     address: StreetAddress
-///     postcode: Postcode
-///     cover_image:
-///         LoremPicsum:
-///             width: 500
-///             height: 200
 /// ```
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum RandomData {
@@ -56,21 +61,41 @@ pub enum RandomData {
     Email,
     /// Generates an integer with the given number of digits.
     ///
-    /// # Examples
+    /// ## Examples
     ///
-    /// `{ "digits": 3 }` will generate a number between 100 and 999, inclusive
+    /// `Number: { "digits": 3 }` will generate a number between 100 and 999, inclusive
     Number {
         /// The number of digits the generated number should have, to get a number with an appropriate
         /// order of magnitude
         digits: usize,
     },
     /// Generate a random number between the minimum and maximum boundaries
+    ///
+    /// ## Examples
+    ///
+    /// `NumberBetween: { "min": 23, "max": 50 }` will generate a number between 23 and 49, inclusive
     NumberBetween {
         /// The minimum boundary for the generated number. This boundary is inclusive
         min: usize,
         /// The maximum boundary for the generated number. This boundary is exclusive
         max: usize,
     },
+    /// Generate a number of paragraphs containing raw lorem ipsum text (No formatting)
+    Paragraphs {
+        /// The number of paragraphs to generate. Defaults to 1
+        amount: Option<usize>,
+    },
+    /// Generate a single paragraph of lorem ipsum text. This is a convenience for specifying
+    /// `Paragraphs` as a simple type without options
+    Paragraph,
+    /// Generate a number of sentences containing raw lorem ipsum text (No formatting)
+    Sentences {
+        /// The number of sentences to generate. Defaults to 1
+        amount: Option<usize>,
+    },
+    /// Generate a single sentence of lorem ipsum text. This is a convenience for specifying
+    /// `Sentences` as a simple type without options
+    Sentence,
     /// Generates the name of a local company - usually an amalgamation of name-parts
     Company,
     /// Generates the name of a city
@@ -87,7 +112,7 @@ pub enum RandomData {
     LongLat,
     /// Generates a GeoJson point object using the WKT formatting for postgis recognition and insertion
     GeoPoint,
-    /// Geenrates a valid postcode
+    /// Generates a valid postcode
     Postcode,
     /// Generates an address with `StreetAddress`, `City` and `PostCode` components, separated by commas
     FullAddress,
@@ -173,6 +198,16 @@ pub fn generate_fake_data(spec: RandomData) -> String {
         RandomData::Email => format!("{}", faker::internet::en::SafeEmail().fake::<String>()),
         RandomData::Number { digits } => format!("{}", number_with_length(digits)),
         RandomData::NumberBetween { min, max } => format!("{}", rand::thread_rng().gen_range(min, max)),
+        RandomData::Paragraph => faker::lorem::en::Paragraph(1..2).fake::<String>(),
+        RandomData::Paragraphs { amount } => {
+            let val = amount.unwrap_or(1usize);
+            format!("{}", faker::lorem::en::Paragraph(val..val+1).fake::<String>())
+        },
+        RandomData::Sentence => faker::lorem::en::Sentence(1..2).fake::<String>(),
+        RandomData::Sentences { amount } => {
+            let val = amount.unwrap_or(1usize);
+            format!("{}", faker::lorem::en::Sentence(val..val+1).fake::<String>())
+        },
         RandomData::Company => format!("{}", faker::company::en::CompanyName().fake::<String>()),
         RandomData::City => format!("{}", faker::address::en::CityName().fake::<String>()),
         RandomData::StreetAddress => format!("{}", faker::address::en::StreetName().fake::<String>()),

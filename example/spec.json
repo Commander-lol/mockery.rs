@@ -41,6 +41,10 @@
 			"email": {
 				"type": "RandomData",
 				"value": "Email"
+			},
+		    "bio": {
+			  "type": "RandomData",
+			  "value": "Paragraph"
 			}
 		},
 		"list_test": {
