@@ -1,8 +1,9 @@
+use crate::generation::OutputType;
+
 use clap::{Arg, App};
 use std::path::PathBuf;
 use std::default::Default;
 
-use generation::OutputType;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct CliArgs {

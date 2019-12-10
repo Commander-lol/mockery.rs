@@ -1,5 +1,4 @@
 use uuid;
-use std;
 
 /// An Enum that represents all of the possible random data generation types.
 /// Where the type is a struct, it should be represented as a nested map type, where the outer

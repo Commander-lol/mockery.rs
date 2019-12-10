@@ -2,13 +2,11 @@
 name = "mockery"
 version = "0.1.0"
 authors = ["Louis Capitanchik <contact@louiscap.co>"]
+edition = "2018"
 
 [dependencies]
 uuid = { version = "0.8.1", features = ["v4"] }
-postgres = "0.15.2"
 clap = "2.33.0"
-r2d2 = "0.8.7"
-r2d2_postgres = "0.14.0"
 fake = { version = "2.2.0", features = ["chrono", "http"] }
 serde = "1.0.103"
 serde_json = "1.0.44"
@@ -19,3 +17,4 @@ lazy_static = "1.4.0"
 rayon = "1.2.1"
 rayon-hash = "0.5.0"
 csv = "1.1.1"
+failure = "0.1.6"

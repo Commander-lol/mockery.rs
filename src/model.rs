@@ -1,5 +1,6 @@
+use crate::datatypes::RandomData;
+
 use std::collections::HashMap;
-use datatypes::RandomData;
 use std::string::ToString;
 
 type Map<T> = HashMap<String, T>;

@@ -1,20 +1,20 @@
+use crate::generation::OutputType;
+use crate::datatypes::RandomData;
+
 use std::collections::HashMap;
 use specification::{Specification, Model, DataType as DT};
 use std::borrow::Borrow;
 use std::str::FromStr;
 use std::rc::Rc;
 use std::path::PathBuf;
-use generation::OutputType;
 
 // ------- TODO: Check these -------
-use std::io::prelude::*;
 use std::fs::{File, read_to_string, create_dir_all};
 use std::convert::AsRef;
 use std::iter::FromIterator;
 
 use serde_json::{from_str, to_string};
 use csv::Writer as Csv;
-use datatypes::RandomData;
 
 // ---------------------------------
 

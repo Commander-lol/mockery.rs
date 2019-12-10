@@ -1,4 +1,4 @@
-use datatypes::RandomData;
+use crate::datatypes::RandomData;
 use std::string::ToString;
 use std::iter::Iterator;
 

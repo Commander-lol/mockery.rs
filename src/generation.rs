@@ -1,5 +1,6 @@
+use crate::model::ModelMap;
+
 use std::collections::HashMap as StdHashMap;
-use model::ModelMap;
 use std::path::{Path, PathBuf};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -46,6 +47,10 @@ impl OutputType {
 pub mod io {
     use super::*;
 
+    use crate::model::{ModelMap, Model};
+    use crate::datatypes::RandomData;
+    use crate::generation::{GenerationSpecification, OutputType};
+
     use std::io::prelude::*;
     use std::io::{Result, Error, ErrorKind, SeekFrom};
     use std::fs::{File, read_to_string, create_dir_all};
@@ -55,12 +60,7 @@ pub mod io {
     use serde_json::{from_str, to_string};
     use csv::Writer as Csv;
 
-    use model::{ModelMap, Model};
-    use datatypes::RandomData;
-    use generation::{GenerationSpecification, OutputType};
     use rayon_hash::HashMap;
-    use rayon::iter::IntoParallelRefIterator;
-    use rayon::iter::ParallelIterator;
 
     use std::sync::{Arc, Mutex};
 

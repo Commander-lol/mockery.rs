@@ -1,7 +1,5 @@
-extern crate clap;
-extern crate mockery;
-
 use mockery::{model, generation, cli, generator};
+use clap;
 
 fn main() {
     let args = cli::get_args_from_stdin();
